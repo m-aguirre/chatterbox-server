@@ -1,3 +1,5 @@
+var fs = require('fs');
+
 /*************************************************************
 
 You should implement your request handler function in this file.
@@ -27,8 +29,9 @@ var requestHandler = function(request, response) {
       body.push(chunk);
     }).on('end', function() {
       body = Buffer.concat(body).toString();
-     // console.log("thisis the body --->",body);
-      obj.results.push(body);     
+      console.log("thisis the body --->",body);
+      obj.results.push(body);
+      //console.log('object before stringify', obj);     
     })
   response.writeHead(201, headers);  
   response.end(JSON.stringify(obj));
@@ -40,15 +43,25 @@ var requestHandler = function(request, response) {
     // request.on('error', function(err) {
     //   console.error(err);
     // })
-    if(request.url === '/arglebargle') {
-     // code = 404; 
-     // console.log('hi argle');  
+
+    fs.readFile(__dirname + '/classes/messages','utf-8', function(err,data) {
+      if (err) {
+        console.log(err)
+        response.statusCode(400);
+        response.end();
+      } else {
+        data = JSON.parse('[' + data + ']');
+      }
+    });
+    if(request.url !== '/classes/messages' && request.url !== '/classes/room') {
+      //console.log('URL LOG: --> ', response);
       response.writeHead(404, headers); 
       response.end(JSON.stringify(obj));
     } else {
-
-  response.writeHead(200, headers);  
-  response.end(JSON.stringify(obj));
+      response.writeHead(200, headers); 
+      // console.log('object', JSON.parse("'" + obj.results[0] + "'")); 
+      console.log('object in get',JSON.parse(JSON.stringify(obj)).results[0]);
+      response.end(JSON.stringify(obj));
   }
 }
 
