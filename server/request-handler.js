@@ -1,4 +1,5 @@
 var fs = require('fs');
+//var App = require('../client/app');
 
 /*************************************************************
 
@@ -19,18 +20,26 @@ var obj = {results: []};
 var requestHandler = function(request, response) {
   var headers = defaultCorsHeaders;
   headers['Content-Type'] = 'application/json';
+  // console.log('hello', request.method)
+
+  if(request.method === 'OPTIONS') {
+    response.writeHead(200, headers);
+    response.end(JSON.stringify(obj));
+  }
 
   if(request.method === 'POST') {
+    // console.log('this is a post');
     var body = [];
     request.on('error', function(err) {
       console.error(err);
     }).on('data', function(chunk) {
-     // console.log("this is the chunk ----->",chunk);
+      // console.log("this is the chunk ----->",chunk);
       body.push(chunk);
+      // console.log('log on 38',Buffer.concat(body).toString())
     }).on('end', function() {
       body = Buffer.concat(body).toString();
-      console.log("thisis the body --->",body);
-      obj.results.push(body);
+      // console.log("this is the body --->", JSON.parse(body));
+      obj.results.push(JSON.parse(body));
       //console.log('object before stringify', obj);     
     })
   response.writeHead(201, headers);  
@@ -44,15 +53,18 @@ var requestHandler = function(request, response) {
     //   console.error(err);
     // })
 
-    fs.readFile(__dirname + '/classes/messages','utf-8', function(err,data) {
-      if (err) {
-        console.log(err)
-        response.statusCode(400);
-        response.end();
-      } else {
-        data = JSON.parse('[' + data + ']');
-      }
-    });
+    // fs.readFile(__dirname + '/classes/messages','utf-8', function(err,data) {
+    //   if (err) {
+    //     console.log(err)
+    //     response.statusCode(404);
+    //     response.end();
+    //   } else {
+    //     data = JSON.parse('[' + data + ']');
+    //     response.statusCode(200);
+    //     response.end(JSON.stringify(obj));
+    //   }
+    // });
+    // console.log(obj);
     if(request.url !== '/classes/messages' && request.url !== '/classes/room') {
       //console.log('URL LOG: --> ', response);
       response.writeHead(404, headers); 
@@ -60,7 +72,7 @@ var requestHandler = function(request, response) {
     } else {
       response.writeHead(200, headers); 
       // console.log('object', JSON.parse("'" + obj.results[0] + "'")); 
-      console.log('object in get',JSON.parse(JSON.stringify(obj)).results[0]);
+      // console.log('object in get',JSON.parse(JSON.stringify(obj)).results[0])
       response.end(JSON.stringify(obj));
   }
 }
@@ -119,6 +131,7 @@ var requestHandler = function(request, response) {
   //var obj = {results: []};
   // obj.results.push(request._postData)
   //response.end(JSON.stringify(obj));
+  // response.end(JSON.stringify(obj));
 };
 
 // These headers will allow Cross-Origin Resource Sharing (CORS).
